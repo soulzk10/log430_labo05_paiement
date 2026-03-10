@@ -53,20 +53,22 @@ def _process_credit_card_payment(payment_data):
 
 
 def update_order(order_id, is_paid):
-    """ Trigger order update once it is paid"""
-    url = "http://api-gateway:8080/store-manager-api/orders"
-    payload = {"order_id": order_id, "is_paid": is_paid}
-
-    resp = requests.put(
-        url,
-        json=payload,
-        headers={"Content-Type": "application/json"},
-        timeout=5
+    """ Update order """
+    response_from_store_manager = requests.put(
+        'http://api-gateway:8080/store-manager-api/orders',
+        json={
+            'order_id': order_id,
+            'is_paid': is_paid,
+        },
+        headers={'Content-Type': 'application/json'}
     )
 
-    
-    if not resp.ok:
-        raise Exception(f"Erreur update_order: {resp.status_code} - {resp.text}")
-
-    logger.debug(f"Store Manager updated order {order_id} is_paid={is_paid}")
-    return resp.json() if resp.content else None
+    if response_from_store_manager.ok:
+        data = response_from_store_manager.json()
+        logger.info(data)
+    else:
+        logger.error(
+            "Erreur:",
+            response_from_store_manager.status_code,
+            response_from_store_manager.text
+        )
